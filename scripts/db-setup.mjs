@@ -8,8 +8,12 @@ if (!process.env.DATABASE_URL && existsSync(".env.local")) {
   const line = readFileSync(".env.local", "utf8").split(/\r?\n/).find((l) => l.startsWith("DATABASE_URL="));
   if (line) process.env.DATABASE_URL = line.slice("DATABASE_URL=".length).replace(/^"|"$/g, "");
 }
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is not set. Run `vercel env pull .env.local` or set it in your shell.");
+if (!process.env.DATABASE_URL || !process.env.DATABASE_URL.startsWith("postgres")) {
+  console.error(
+    "DATABASE_URL is not set to a real connection string. Vercel doesn't export Sensitive values,\n" +
+      "so copy it from the Neon console and set it in your shell, or paste db/schema.sql and db/seed.sql\n" +
+      "into the Neon SQL Editor instead."
+  );
   process.exit(1);
 }
 
