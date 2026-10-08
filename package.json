@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "tsx tests/rules.test.ts",
-    "db:setup": "psql \"$DATABASE_URL\" -f db/schema.sql && psql \"$DATABASE_URL\" -f db/seed.sql"
+    "db:setup": "node scripts/db-setup.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

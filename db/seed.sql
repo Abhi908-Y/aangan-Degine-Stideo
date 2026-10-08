@@ -1,9 +1,12 @@
 -- 14 placeholder designers. Replace names and add real Telegram chat ids.
-INSERT INTO designers (name) VALUES
+-- Only inserted into an empty table, so re-running db:setup doesn't duplicate them.
+INSERT INTO designers (name)
+SELECT n FROM (VALUES
  ('Designer 01'),('Designer 02'),('Designer 03'),('Designer 04'),('Designer 05'),
  ('Designer 06'),('Designer 07'),('Designer 08'),('Designer 09'),('Designer 10'),
  ('Designer 11'),('Designer 12'),('Designer 13'),('Designer 14')
-ON CONFLICT DO NOTHING;
+) AS v(n)
+WHERE NOT EXISTS (SELECT 1 FROM designers);
 
 -- Mock calendar: for the next 14 days, Mon–Sat, each designer gets three 30-min
 -- consultation slots (11:00, 15:00, 17:30 IST). Replace with Cal.com later.

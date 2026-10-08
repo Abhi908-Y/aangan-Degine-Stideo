@@ -30,7 +30,7 @@ and HubSpot holds the sales pipeline.
 ## Setup
 
 1. **GitHub:** push this folder to a new repo.
-2. **Neon:** create a project, copy the connection string, then run `DATABASE_URL=... npm run db:setup`
+2. **Neon:** create a project, copy the connection string, then run `npm run db:setup` (reads `DATABASE_URL` from your shell or from `.env.local` after `vercel env pull`)
    (creates tables + 14 placeholder designers + a mock calendar for the next 14 days).
 3. **Vercel:** import the repo, add every variable from `.env.example`, plus `NEXT_PUBLIC_BASE_URL`
    (your Vercel URL). Deploy.
