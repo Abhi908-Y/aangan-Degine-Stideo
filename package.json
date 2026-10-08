@@ -1,0 +1,24 @@
+{
+  "name": "aangan-voice",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "tsx tests/rules.test.ts",
+    "db:setup": "psql \"$DATABASE_URL\" -f db/schema.sql && psql \"$DATABASE_URL\" -f db/seed.sql"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  }
+}
