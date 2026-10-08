@@ -1,4 +1,5 @@
-// Runs hourly (vercel.json). Keeps every promise made on the phone:
+// Runs hourly via an external cron (cron-job.org, Bearer CRON_SECRET); vercel.json adds a daily
+// fallback because Vercel Hobby only allows daily crons. Keeps every promise made on the phone:
 //  1. Sensitive declines get the polite "not the right fit" message ~20h later, no reason given.
 //  2. Overdue reviews nudge the designer, and Nikhil, on Telegram.
 export const dynamic = "force-dynamic";

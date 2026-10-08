@@ -24,7 +24,8 @@ and HubSpot holds the sales pipeline.
 
 4. Vaani sends the end-of-call report to **`/api/vaani/webhook`**: transcript, summary and cost are stored.
    A qualified caller who hung up before booking becomes a review lead with a 4-hour callback deadline.
-5. **`/api/cron/sweep`** runs hourly: sends auto-decline messages and nudges overdue reviews.
+5. **`/api/cron/sweep`** runs hourly (cron-job.org calls it with `Authorization: Bearer $CRON_SECRET`; `vercel.json`
+   adds a daily fallback, since Vercel Hobby only allows daily crons): sends auto-decline messages and nudges overdue reviews.
 
 ## Setup
 
