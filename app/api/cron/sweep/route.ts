@@ -8,7 +8,7 @@ import { messageCaller, AUTO_DECLINE_TEXT } from "@/lib/messaging";
 import { sendTelegram } from "@/lib/telegram";
 
 export async function GET(req: Request) {
-  if (process.env.CRON_SECRET && req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!process.env.CRON_SECRET || req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response("unauthorised", { status: 401 });
   }
 
