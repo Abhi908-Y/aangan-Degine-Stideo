@@ -1,0 +1,13 @@
+{
+  "phone": "+919000000004",
+  "fields": {
+    "caller_type": "new_enquiry", "name": "TEST Ananya", "project_intent": "design_and_execution",
+    "property_category": "residential", "location_text": "Wakad", "carpet_area_sqft": 1100, "bhk": 3,
+    "scope_type": "full_home", "completion_needed_by": "2027-04-30", "decision_maker": "yes",
+    "budget_inr": { "min": 2000000, "max": 2500000 }, "budget_text": "20 to 25 lakhs",
+    "notes_from_call": "New possession, wants Scandinavian style."
+  },
+  "pick_slot": 0, "email": "aangan.test.caller@example.com", "duration_sec": 260,
+  "summary": "TEST call. Ananya, 3BHK Wakad, full home, complete by April 2027, budget 20-25 lakhs. Booked via Cal.com.",
+  "transcript": "Agent: What email should I send the calendar invite to?\nCaller: aangan.test.caller@example.com\nAgent: That's a-a-n-g-a-n dot test dot caller at example dot com — is that right?\nCaller: Yes."
+}

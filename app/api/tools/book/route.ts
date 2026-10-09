@@ -57,6 +57,13 @@ export async function POST(req: Request) {
     if (!r.ok) {
       console.error(r.error);
       await sql`UPDATE designer_slots SET booked = FALSE WHERE id=${slot.id}`;
+      // Cal.com checks the address can receive mail — usually a misheard email. Ask again; keep the slot.
+      if (/email/i.test(r.error)) {
+        return Response.json({
+          booked: false, need_email: true,
+          say: "I'm sorry, I couldn't send the invite to that email. Could you spell your email address for me once more?",
+        });
+      }
       return retry("Sorry, that time just became unavailable. Here are the next available times.");
     }
     calUid = r.uid;
