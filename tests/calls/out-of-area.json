@@ -1,0 +1,12 @@
+{
+  "phone": "+919000000003",
+  "fields": {
+    "caller_type": "new_enquiry", "name": "TEST Meena", "project_intent": "design_and_execution",
+    "property_category": "residential", "location_text": "Talegaon", "bhk": 3, "scope_type": "full_home",
+    "timeline_flexible": true, "decision_maker": "yes", "budget_inr": { "min": 2000000, "max": 2500000 },
+    "budget_text": "20 to 25 lakhs"
+  },
+  "pick_slot": null, "duration_sec": 120,
+  "summary": "TEST call. Meena, 3BHK in Talegaon, outside service area. Declined politely.",
+  "transcript": "Caller: The flat is in Talegaon.\nAgent: Thank you so much for calling Aangan Studio. Unfortunately we don't serve Talegaon yet..."
+}

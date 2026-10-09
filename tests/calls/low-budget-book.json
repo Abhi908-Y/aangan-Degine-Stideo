@@ -1,0 +1,13 @@
+{
+  "phone": "+919000000002",
+  "fields": {
+    "caller_type": "new_enquiry", "name": "TEST Rohan", "project_intent": "design_and_execution",
+    "property_category": "residential", "location_text": "Baner", "carpet_area_sqft": 950, "bhk": 2,
+    "scope_type": "full_home", "timeline_flexible": true, "decision_maker": "yes",
+    "budget_inr": { "max": 500000 }, "budget_text": "around 5 lakhs",
+    "notes_from_call": "Owned flat, wants kitchen and living room priority."
+  },
+  "pick_slot": 1, "duration_sec": 200,
+  "summary": "TEST call. Rohan, 2BHK Baner, full home, flexible timeline, said budget around 5 lakhs. Booked.",
+  "transcript": "Agent: Do you have a budget in mind for this project?\nCaller: Around 5 lakhs.\nAgent: Thank you, that's noted."
+}
