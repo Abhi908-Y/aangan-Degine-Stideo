@@ -5,6 +5,8 @@
 
 /** Tool calls: return the arguments object the agent passed to our tool. */
 export function toolArgs(body: any): any {
+  // TEMPORARY (testing phase): log Vaani's raw tool payload to learn its exact shape. Remove before go-live.
+  console.log("[vaani tool payload]", JSON.stringify(body).slice(0, 2000));
   return body?.arguments ?? body?.args ?? body?.parameters ?? body?.input ?? body;
 }
 

@@ -14,9 +14,12 @@ export async function POST(req: Request) {
     LEFT JOIN bookings b ON b.lead_id = l.id
     WHERE l.phone = ${phone} AND l.created_at > now() - interval '60 days'
     ORDER BY l.created_at DESC LIMIT 1`;
-  if (!lead) return Response.json({ known: false });
+  // The agent has no clock of its own; it needs today's date to turn "by March" into a date for classify.
+  const today = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date());
+  if (!lead) return Response.json({ known: false, today });
   return Response.json({
     known: true,
+    today,
     lead_id: lead.id,
     name: lead.name,
     status: lead.status,
