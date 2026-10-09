@@ -71,3 +71,8 @@ CREATE TABLE IF NOT EXISTS actions (
   detail      JSONB NOT NULL DEFAULT '{}',
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Cal.com (Oct 2026). A designer with an event type id books through Cal.com, which sends the
+-- calendar invite to the designer and the customer. Safe to re-run.
+ALTER TABLE designers ADD COLUMN IF NOT EXISTS calcom_event_type_id INT;
+ALTER TABLE bookings  ADD COLUMN IF NOT EXISTS calcom_booking_uid TEXT;

@@ -158,7 +158,7 @@
     },
     {
       "name": "book",
-      "description": "Call when a BOOK-tier caller picks one of the offered slots.",
+      "description": "Call when a BOOK-tier caller picks one of the offered slots. Pass the caller’s email (spelled back and confirmed) so they get the calendar invite. If the response has need_email: true, ask for the email and call book again.",
       "url": "/api/tools/book",
       "parameters": {
         "type": "object",
@@ -172,6 +172,10 @@
           },
           "slot_id": {
             "type": "number"
+          },
+          "email": {
+            "type": "string",
+            "description": "Caller’s email address, confirmed by spelling it back, e.g. priya.k@gmail.com"
           }
         }
       }

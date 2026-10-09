@@ -16,6 +16,7 @@ export async function upsertDeal(o: {
   existingDealId?: string | null; name?: string; phone: string; tier: "BOOK" | "REVIEW";
   summary?: string; designer?: string;
   budget?: { min?: number; max: number } | null; budgetText?: string; // CRM tracking only
+  email?: string;
 }): Promise<string | null> {
   if (!process.env.HUBSPOT_TOKEN) { console.warn("HubSpot skipped (no token)"); return null; }
   const stage = o.tier === "BOOK" ? process.env.HUBSPOT_STAGE_BOOKED : process.env.HUBSPOT_STAGE_REVIEW;
@@ -30,8 +31,13 @@ export async function upsertDeal(o: {
     await hs(`/crm/v3/objects/deals/${o.existingDealId}`, "PATCH", { properties: props });
     return o.existingDealId;
   }
+  // A contact with this email may already exist (409) — reuse it instead of failing the deal.
   const contact = await hs("/crm/v3/objects/contacts", "POST", {
-    properties: { firstname: o.name ?? "", phone: o.phone },
+    properties: { firstname: o.name ?? "", phone: o.phone, ...(o.email ? { email: o.email } : {}) },
+  }).catch((e: Error) => {
+    const existing = e.message.match(/Existing ID: (\d+)/);
+    if (existing) return { id: existing[1] };
+    throw e;
   });
   const deal = await hs("/crm/v3/objects/deals", "POST", { properties: props });
   await hs(`/crm/v4/objects/deals/${deal.id}/associations/default/contacts/${contact.id}`, "PUT");

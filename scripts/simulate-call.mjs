@@ -5,7 +5,7 @@
 //
 // The scenario file holds what Vaani's LLM would have extracted during the call:
 //   { "phone": "+91…", "fields": { …LeadFields… }, "pick_slot": 0 | null, "transcript": "…", "summary": "…",
-//     "duration_sec": 240 }
+//     "email": "caller@example.com", "duration_sec": 240 }
 // pick_slot: index of the offered slot the caller chooses (BOOK tier only); null = hangs up without booking.
 // Secrets come from the environment or .env.secrets.local (AANGAN_TOOL_SECRET).
 import { readFileSync, existsSync } from "node:fs";
@@ -50,8 +50,8 @@ if (c.slots?.length) c.slots.forEach((o, i) => console.log(`   slot ${i}: ${o.de
 
 if (c.tier === "BOOK" && c.slots?.length && s.pick_slot != null) {
   const pick = c.slots[s.pick_slot] ?? c.slots[0];
-  const b = await post("/api/tools/book", { lead_id: c.lead_id, slot_id: pick.slot_id });
-  console.log(`3. book: ${b.booked ? "booked" : "slot taken"}`);
+  const b = await post("/api/tools/book", { lead_id: c.lead_id, slot_id: pick.slot_id, email: s.email });
+  console.log(`3. book: ${b.booked ? "booked" : b.need_email ? "needs the caller's email first" : "not booked (slot taken)"}`);
   console.log(`   agent says: "${b.say}"`);
 } else if (c.tier === "BOOK") {
   console.log("3. book: caller hung up without choosing a slot");
