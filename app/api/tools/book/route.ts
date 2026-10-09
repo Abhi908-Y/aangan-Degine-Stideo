@@ -36,7 +36,7 @@ export async function POST(req: Request) {
   }));
   await messageCaller(lead.phone, `Your consultation with ${designer.name} from Aangan Studio is confirmed for ${when}. To reschedule, reply to this message or call the studio.`);
   try {
-    const dealId = await upsertDeal({ existingDealId: lead.hubspot_deal_id, name: lead.name, phone: lead.phone, tier: "BOOK", designer: designer.name });
+    const dealId = await upsertDeal({ existingDealId: lead.hubspot_deal_id, name: lead.name, phone: lead.phone, tier: "BOOK", designer: designer.name, budget: lead.fields?.budget_inr, budgetText: lead.fields?.budget_text });
     if (dealId) await sql`UPDATE leads SET hubspot_deal_id=${dealId} WHERE id=${lead_id}`;
   } catch (e) { console.error(e); }
 

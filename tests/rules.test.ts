@@ -13,18 +13,18 @@ const cases: Case[] = [
     f: { ...base, property_category: "residential", location_text: "Wakad", carpet_area_sqft: 950, bhk: 2, scope_type: "full_home", completion_needed_by: "2026-11-01" } },
   { id: "T03 Nashik home office", date: "2026-09-03", expect: "DECLINE_FACTUAL",
     f: { ...base, property_category: "residential", location_text: "Nashik", scope_type: "partial", rooms_count: 2, timeline_flexible: true } },
-  { id: "T04 living room ideas only", date: "2026-09-04", expect: "DECLINE_FACTUAL",
+  { id: "T04 living room ideas only", date: "2026-09-04", expect: "REVIEW",
     f: { ...base, project_intent: "advice_only", property_category: "residential", location_text: "unknown", decision_maker: "yes", timeline_flexible: true } },
   { id: "T05 Aarti, Koregaon Park 4BHK, Feb", date: "2026-09-05", expect: "BOOK",
     f: { ...base, property_category: "residential", location_text: "Koregaon Park", carpet_area_sqft: 2400, bhk: 4, scope_type: "full_home", completion_needed_by: "2027-02-01" } },
   { id: "T06 Baner startup office 800 sq ft, Dec", date: "2026-09-05", expect: "BOOK",
     f: { ...base, property_category: "office", location_text: "Baner", carpet_area_sqft: 800, scope_type: "commercial_fitout", completion_needed_by: "2026-12-01" } },
-  { id: "T07 before Diwali (3 weeks)", date: "2026-09-08", expect: "DECLINE_FACTUAL",
+  { id: "T07 before Diwali (3 weeks)", date: "2026-09-08", expect: "REVIEW",
     f: { ...base, property_category: "residential", location_text: "Pune", scope_type: "partial", rooms_count: 2, completion_needed_by: "2026-09-29" } },
   { id: "T09 existing client complaint", date: "2026-09-10", expect: "ESCALATE",
     f: { ...base, caller_type: "existing_client", property_category: "residential", location_text: "Viman Nagar" } },
-  { id: "T10 Kharadi 1BHK, ₹1–1.5L", date: "2026-09-11", expect: "DECLINE_SENSITIVE",
-    f: { ...base, property_category: "residential", location_text: "Kharadi", carpet_area_sqft: 550, bhk: 1, scope_type: "partial", rooms_count: 2, timeline_flexible: true, budget_volunteered_inr: { min: 100000, max: 150000 } } },
+  { id: "T10 Kharadi 1BHK, ₹1–1.5L", date: "2026-09-11", expect: "REVIEW",
+    f: { ...base, property_category: "residential", location_text: "Kharadi", carpet_area_sqft: 550, bhk: 1, scope_type: "partial", rooms_count: 2, timeline_flexible: true, budget_inr: { min: 100000, max: 150000 } } },
   { id: "T11 rented Baner 2BHK", date: "2026-09-12", expect: "BOOK",
     f: { ...base, property_category: "residential", location_text: "Baner", bhk: 2, scope_type: "partial", rooms_count: 3, timeline_flexible: true } },
   { id: "T12 Kalyani Nagar villa 5,500 sq ft", date: "2026-09-15", expect: "BOOK",
@@ -39,9 +39,9 @@ const cases: Case[] = [
     f: { ...base, property_category: "residential", location_text: "Viman Nagar", bhk: 3, scope_type: "full_home", timeline_flexible: true } },
   { id: "T17 Ritu, Pimple Saudagar, March", date: "2026-09-22", expect: "BOOK",
     f: { ...base, property_category: "residential", location_text: "Pimple Saudagar", carpet_area_sqft: 1050, bhk: 3, scope_type: "full_home", completion_needed_by: "2027-03-31" } },
-  { id: "T18 coworking pod 180 sq ft", date: "2026-09-23", expect: "DECLINE_SENSITIVE",
+  { id: "T18 coworking pod 180 sq ft", date: "2026-09-23", expect: "REVIEW",
     f: { ...base, property_category: "office", location_text: "Pune", carpet_area_sqft: 180, scope_type: "commercial_fitout", timeline_flexible: true } },
-  { id: "T19 restaurant, Koregaon Park", date: "2026-09-24", expect: "DECLINE_FACTUAL",
+  { id: "T19 restaurant, Koregaon Park", date: "2026-09-24", expect: "REVIEW",
     f: { ...base, property_category: "restaurant", location_text: "Koregaon Park", timeline_flexible: true } },
   { id: "T20 Pooja, Magarpatta 2BHK, Jan start", date: "2026-09-25", expect: "BOOK",
     f: { ...base, property_category: "residential", location_text: "Magarpatta", carpet_area_sqft: 900, bhk: 2, scope_type: "full_home", timeline_flexible: true } },
@@ -57,4 +57,27 @@ for (const c of cases) {
   console.log(`      reasons: ${d.reasons.join("; ")}${d.notes.length ? ` | notes: ${d.notes.join("; ")}` : ""}`);
 }
 console.log(`\n${cases.length - failed}/${cases.length} transcripts classified as expected`);
-if (failed) process.exit(1);
+
+// Studio policy: budget is asked on every call but NEVER changes the tier.
+// Re-run every transcript with a tiny, a huge and no budget — the tier must not move.
+let budgetFailed = 0;
+for (const c of cases) {
+  const at = new Date(c.date + "T12:00:00+05:30");
+  for (const budget_inr of [{ max: 10000 }, { min: 5e7, max: 1e8 }, null]) {
+    const tier = decide({ ...c.f, budget_inr }, at).tier;
+    if (tier !== c.expect) { budgetFailed++; console.log(`FAIL  ${c.id}: budget ${JSON.stringify(budget_inr)} changed tier to ${tier}`); }
+  }
+}
+console.log(`${budgetFailed ? "FAIL" : "PASS"}  budget never changes the tier (${cases.length * 3} checks)`);
+
+// A low stated budget reaches the designer as a private note.
+const low = decide({ ...cases[0].f, budget_inr: { max: 500000 } }, new Date("2026-09-02T12:00:00+05:30"));
+const lowOk = low.tier === "BOOK" && low.notes.some((n) => n.includes("budget looks low"));
+console.log(`${lowOk ? "PASS" : "FAIL"}  low budget → still BOOK, designer gets a note`);
+
+// Out of area is the only automatic decline.
+const out = decide({ ...cases[0].f, location_text: "Talegaon" }, new Date("2026-09-02T12:00:00+05:30"));
+const outOk = out.tier === "DECLINE_FACTUAL" && out.say.includes("Talegaon");
+console.log(`${outOk ? "PASS" : "FAIL"}  out of area → declined on the call`);
+
+if (failed || budgetFailed || !lowOk || !outOk) process.exit(1);

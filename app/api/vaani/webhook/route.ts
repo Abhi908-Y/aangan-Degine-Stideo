@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       fields: lead.fields, summary: c.summary, notes: lead.notes, dashboardUrl: `${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/dashboard?lead=${lead.id}`,
     }));
     try {
-      const dealId = await upsertDeal({ existingDealId: lead.hubspot_deal_id, name: lead.name, phone: lead.phone, tier: "REVIEW", designer: d.name, summary: c.summary });
+      const dealId = await upsertDeal({ existingDealId: lead.hubspot_deal_id, name: lead.name, phone: lead.phone, tier: "REVIEW", designer: d.name, summary: c.summary, budget: lead.fields?.budget_inr, budgetText: lead.fields?.budget_text });
       if (dealId) await sql`UPDATE leads SET hubspot_deal_id=${dealId} WHERE id=${lead.id}`;
     } catch (e) { console.error(e); }
   }

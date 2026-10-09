@@ -11,15 +11,14 @@ and HubSpot holds the sales pipeline.
 
 1. A call comes in after hours or goes unanswered → Vaani picks up with the prompt in `prompts/voice-agent.md`.
 2. The agent calls **`lookup_caller`**, so repeat callers aren't asked twice.
-3. The agent asks the questions (never budget), then calls **`classify`**. `lib/rules.ts` decides the tier from
+3. The agent asks the questions (including budget, which it notes but never judges), then calls **`classify`**. `lib/rules.ts` decides the tier from
    Nikhil's five criteria — the AI gathers the answers, the rules decide:
 
 | Tier | Caller hears | What happens |
 |---|---|---|
 | `BOOK` | Slots offered → **`book`** | Slot claimed, designer alerted on Telegram, HubSpot deal created |
 | `REVIEW` | "A designer will review… and connect with you" | Assigned designer, 24h deadline, Telegram alert, HubSpot deal |
-| `DECLINE_FACTUAL` | Honest reason (area, service type, advice-only, timeline too short) | Logged as declined |
-| `DECLINE_SENSITIVE` | "We'll get back to you" (budget / size — reason never said) | Polite decline message sent ~20h later by the cron |
+| `DECLINE_FACTUAL` | "We don't serve your area yet" — **only** for sites outside Pune / PCMC | Logged as declined |
 | `ESCALATE` | Senior callback within 15 minutes | Nikhil alerted on Telegram immediately |
 
 4. Vaani sends the end-of-call report to **`/api/vaani/webhook`**: transcript, summary and cost are stored.
@@ -54,7 +53,10 @@ and HubSpot holds the sales pipeline.
 - **Caller messages.** `lib/messaging.ts` only logs for now. Plug in the SMS provider your number runs on,
   otherwise booking confirmations and auto-decline messages won't reach callers.
 - **Calendars.** Bookings use the mock `designer_slots` table. Swap `lib/assign.ts` to Cal.com when designers' calendars are connected.
-- **Thresholds** in `lib/rules.ts` (6/10-week timeline bands, 500 sq ft commercial minimum, 50% budget test)
+- **Policy (Oct 2026):** the only automatic decline is an out-of-area site. Advice-only, out-of-scope property types,
+  short timelines and small offices go to a designer. Budget is asked on every call, shown on the dashboard and as the
+  HubSpot deal amount, and never changes the tier.
+- **Thresholds** in `lib/rules.ts` (6/10-week timeline bands, 500 sq ft commercial minimum, 80% low-budget note)
   are proposals — confirm them with Nikhil. Areas not on the service list (e.g. Kharadi, Nanded City) go to review.
 
 ## Tests

@@ -7,6 +7,13 @@ export const dynamic = "force-dynamic";
 const inr = (n: number) => "₹" + Math.round(n).toLocaleString("en-IN");
 const when = (d: string | Date) =>
   new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }).format(new Date(d));
+// ₹12 L, ₹1.2 Cr, ₹12–15 L. Budget is for the studio's eyes only — never read to the caller.
+const amt = (n: number) => (n >= 1e7 ? `${+(n / 1e7).toFixed(2)} Cr` : `${+(n / 1e5).toFixed(1)} L`);
+const budget = (f: any): string | null => {
+  const b = f?.budget_inr;
+  if (b?.max) return `₹${b.min && b.min !== b.max ? `${amt(b.min).replace(/ (L|Cr)$/, "")}–` : ""}${amt(b.max)}`;
+  return f?.budget_text ? `Budget: ${f.budget_text}` : null;
+};
 const TIER_LABEL: Record<string, string> = {
   BOOK: "Booked", REVIEW: "Needs review", DECLINE_FACTUAL: "Declined on call", DECLINE_SENSITIVE: "Auto-declined", ESCALATE: "Existing client",
 };
@@ -61,7 +68,7 @@ export default async function Dashboard({ searchParams }: { searchParams: { desi
       <li className={`row t-${l.tier.toLowerCase()}`}>
         <a className="who" href={`${back}${back.includes("?") ? "&" : "?"}lead=${l.id}`}>
           <strong>{l.name ?? "Unnamed caller"}</strong>
-          <span>{[f.bhk ? `${f.bhk}BHK` : f.property_category, f.location_text, f.carpet_area_sqft && `${f.carpet_area_sqft} sq ft`].filter(Boolean).join(", ")}</span>
+          <span>{[f.bhk ? `${f.bhk}BHK` : f.property_category, f.location_text, f.carpet_area_sqft && `${f.carpet_area_sqft} sq ft`, budget(f)].filter(Boolean).join(", ")}</span>
         </a>
         <span className="meta">{l.designer ?? "Unassigned"}</span>
         {children}
@@ -138,7 +145,8 @@ export default async function Dashboard({ searchParams }: { searchParams: { desi
               {selected.summary && <p>{selected.summary}</p>}
               {(selected.notes ?? []).length > 0 && <p className="note">{selected.notes.join(" ")}</p>}
               <dl>
-                {Object.entries(selected.fields ?? {}).filter(([, v]) => v !== null && v !== "" && typeof v !== "object").map(([k, v]) => (
+                <div><dt>budget</dt><dd>{budget(selected.fields) ?? "Not given"}{selected.fields?.budget_inr?.max && selected.fields?.budget_text ? ` ("${selected.fields.budget_text}")` : ""}</dd></div>
+                {Object.entries(selected.fields ?? {}).filter(([k]) => k !== "budget_text").filter(([, v]) => v !== null && v !== "" && typeof v !== "object").map(([k, v]) => (
                   <div key={k}><dt>{k.replace(/_/g, " ")}</dt><dd>{String(v)}</dd></div>
                 ))}
               </dl>

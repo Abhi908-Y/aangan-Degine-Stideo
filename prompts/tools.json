@@ -5,7 +5,17 @@
       "name": "lookup_caller",
       "description": "Call at the very start of every call to check whether this number has called before.",
       "url": "/api/tools/lookup-caller",
-      "parameters": { "type": "object", "required": ["phone"], "properties": { "phone": { "type": "string" } } }
+      "parameters": {
+        "type": "object",
+        "required": [
+          "phone"
+        ],
+        "properties": {
+          "phone": {
+            "type": "string"
+          }
+        }
+      }
     },
     {
       "name": "classify",
@@ -13,32 +23,134 @@
       "url": "/api/tools/classify",
       "parameters": {
         "type": "object",
-        "required": ["phone", "fields"],
+        "required": [
+          "phone",
+          "fields"
+        ],
         "properties": {
-          "phone": { "type": "string" },
+          "phone": {
+            "type": "string"
+          },
           "fields": {
             "type": "object",
-            "required": ["caller_type", "project_intent", "property_category", "decision_maker"],
+            "required": [
+              "caller_type",
+              "project_intent",
+              "property_category",
+              "decision_maker"
+            ],
             "properties": {
-              "caller_type": { "enum": ["new_enquiry", "existing_client", "other"] },
-              "name": { "type": "string" },
-              "project_intent": { "enum": ["design_and_execution", "advice_only", "decor_only", "furniture_only", "vastu_only", "unclear"] },
-              "property_category": { "enum": ["residential", "office", "clinic", "studio", "restaurant", "hotel", "retail", "gym", "other", "unknown"] },
-              "location_text": { "type": "string", "description": "Locality as the caller said it, e.g. 'Baner' or 'Nashik'" },
-              "carpet_area_sqft": { "type": ["number", "null"] },
-              "bhk": { "type": ["number", "null"] },
-              "scope_type": { "enum": ["full_home", "partial", "single_room", "commercial_fitout", "unknown"] },
-              "rooms_count": { "type": ["number", "null"], "description": "Rooms being designed, for partial or single-room projects" },
-              "completion_needed_by": { "type": ["string", "null"], "description": "ISO date (YYYY-MM-DD) the caller needs it complete; null if not given" },
-              "timeline_flexible": { "type": "boolean", "description": "True if they said no rush / flexible / whenever" },
-              "budget_volunteered_inr": {
-                "type": ["object", "null"],
-                "description": "ONLY if the caller volunteered a budget. Never ask.",
-                "properties": { "min": { "type": "number" }, "max": { "type": "number" } }
+              "caller_type": {
+                "enum": [
+                  "new_enquiry",
+                  "existing_client",
+                  "other"
+                ]
               },
-              "decision_maker": { "enum": ["yes", "authorised", "unclear", "no"] },
-              "structural_changes_requested": { "type": "boolean" },
-              "notes_from_call": { "type": "string", "description": "Anything specific: kitchen, wardrobes, style, possession date, rented, complaint details" }
+              "name": {
+                "type": "string"
+              },
+              "project_intent": {
+                "enum": [
+                  "design_and_execution",
+                  "advice_only",
+                  "decor_only",
+                  "furniture_only",
+                  "vastu_only",
+                  "unclear"
+                ]
+              },
+              "property_category": {
+                "enum": [
+                  "residential",
+                  "office",
+                  "clinic",
+                  "studio",
+                  "restaurant",
+                  "hotel",
+                  "retail",
+                  "gym",
+                  "other",
+                  "unknown"
+                ]
+              },
+              "location_text": {
+                "type": "string",
+                "description": "Locality as the caller said it, e.g. 'Baner' or 'Nashik'"
+              },
+              "carpet_area_sqft": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "bhk": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "scope_type": {
+                "enum": [
+                  "full_home",
+                  "partial",
+                  "single_room",
+                  "commercial_fitout",
+                  "unknown"
+                ]
+              },
+              "rooms_count": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "description": "Rooms being designed, for partial or single-room projects"
+              },
+              "completion_needed_by": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "description": "ISO date (YYYY-MM-DD) the caller needs it complete; null if not given"
+              },
+              "timeline_flexible": {
+                "type": "boolean",
+                "description": "True if they said no rush / flexible / whenever"
+              },
+              "budget_inr": {
+                "type": [
+                  "object",
+                  "null"
+                ],
+                "description": "Budget the caller stated, in rupees (e.g. 12 to 15 lakhs → {min:1200000,max:1500000}; a single figure → {max:…}). null if they did not give one.",
+                "properties": {
+                  "min": {
+                    "type": "number"
+                  },
+                  "max": {
+                    "type": "number"
+                  }
+                }
+              },
+              "budget_text": {
+                "type": "string",
+                "description": "The caller’s budget answer in their own words, e.g. \"around 12-15 lakhs\" or \"not decided yet\""
+              },
+              "decision_maker": {
+                "enum": [
+                  "yes",
+                  "authorised",
+                  "unclear",
+                  "no"
+                ]
+              },
+              "structural_changes_requested": {
+                "type": "boolean"
+              },
+              "notes_from_call": {
+                "type": "string",
+                "description": "Anything specific: kitchen, wardrobes, style, possession date, rented, complaint details"
+              }
             }
           }
         }
@@ -50,8 +162,18 @@
       "url": "/api/tools/book",
       "parameters": {
         "type": "object",
-        "required": ["lead_id", "slot_id"],
-        "properties": { "lead_id": { "type": "number" }, "slot_id": { "type": "number" } }
+        "required": [
+          "lead_id",
+          "slot_id"
+        ],
+        "properties": {
+          "lead_id": {
+            "type": "number"
+          },
+          "slot_id": {
+            "type": "number"
+          }
+        }
       }
     }
   ],

@@ -15,6 +15,7 @@ async function hs(path: string, method: string, body?: unknown) {
 export async function upsertDeal(o: {
   existingDealId?: string | null; name?: string; phone: string; tier: "BOOK" | "REVIEW";
   summary?: string; designer?: string;
+  budget?: { min?: number; max: number } | null; budgetText?: string; // CRM tracking only
 }): Promise<string | null> {
   if (!process.env.HUBSPOT_TOKEN) { console.warn("HubSpot skipped (no token)"); return null; }
   const stage = o.tier === "BOOK" ? process.env.HUBSPOT_STAGE_BOOKED : process.env.HUBSPOT_STAGE_REVIEW;
@@ -22,7 +23,8 @@ export async function upsertDeal(o: {
     dealname: `${o.name ?? "Phone enquiry"} · ${o.phone}`,
     pipeline: process.env.HUBSPOT_PIPELINE_ID ?? "default",
     dealstage: stage,
-    description: `Tier: ${o.tier}${o.designer ? ` · Designer: ${o.designer}` : ""}\n\n${o.summary ?? ""}`.slice(0, 5000),
+    description: `Tier: ${o.tier}${o.designer ? ` · Designer: ${o.designer}` : ""}${o.budgetText ? ` · Budget: ${o.budgetText}` : ""}\n\n${o.summary ?? ""}`.slice(0, 5000),
+    ...(o.budget?.max ? { amount: String(o.budget.max) } : {}), // stated budget (upper end) as the deal amount
   };
   if (o.existingDealId) {
     await hs(`/crm/v3/objects/deals/${o.existingDealId}`, "PATCH", { properties: props });
