@@ -26,6 +26,21 @@ export async function calSlots(eventTypeId: number, from: Date, to: Date): Promi
     .sort();
 }
 
+/** A booking made for this attendee in the last `withinMs` (e.g. by Vaani's Cal.com integration during the call). */
+export async function calFindRecentBooking(email: string, withinMs = 3 * 3600 * 1000):
+  Promise<{ uid: string; start: string; eventTypeId: number } | null> {
+  if (!process.env.CALCOM_API_KEY || !email) return null;
+  const q = new URLSearchParams({ attendeeEmail: email, sortCreated: "desc", take: "5" });
+  const res = await fetch(`${API}/bookings?${q}`, { headers: headers("2024-08-13"), cache: "no-store" });
+  if (!res.ok) { console.error(`Cal.com bookings → ${res.status}: ${await res.text()}`); return null; }
+  const j = await res.json();
+  const since = Date.now() - withinMs;
+  const b = (j.data ?? []).find((x: any) =>
+    x.status !== "cancelled" && new Date(x.createdAt ?? x.created_at ?? 0).getTime() >= since &&
+    (x.attendees ?? []).some((a: any) => String(a.email).toLowerCase() === email.toLowerCase()));
+  return b ? { uid: String(b.uid), start: new Date(b.start ?? b.startTime).toISOString(), eventTypeId: Number(b.eventTypeId ?? b.eventType?.id) } : null;
+}
+
 export type CalBooking = { ok: true; uid: string } | { ok: false; error: string };
 
 /** Book a slot. Cal.com emails the calendar invite to the designer and the attendee. */

@@ -6,8 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "tsx tests/rules.test.ts",
-    "db:setup": "node scripts/db-setup.mjs"
+    "test": "tsx tests/rules.test.ts && tsx tests/leads.test.ts",
+    "db:setup": "node scripts/db-setup.mjs",
+    "vaani:sync": "tsx scripts/vaani-sync.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
