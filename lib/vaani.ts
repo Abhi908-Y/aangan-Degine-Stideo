@@ -5,9 +5,41 @@
 
 /** Tool calls: return the arguments object the agent passed to our tool. */
 export function toolArgs(body: any): any {
-  // TEMPORARY (testing phase): log Vaani's raw tool payload to learn its exact shape. Remove before go-live.
-  console.log("[vaani tool payload]", JSON.stringify(body).slice(0, 2000));
   return body?.arguments ?? body?.args ?? body?.parameters ?? body?.input ?? body;
+}
+
+// Values may arrive as JSON-encoded strings (e.g. fields="{...}" in a query string).
+const maybeJson = (v: unknown) => {
+  if (typeof v !== "string") return v;
+  const t = v.trim();
+  if (!/^[{\["]|^-?\d+(\.\d+)?$|^(true|false|null)$/.test(t)) return v;
+  try { return JSON.parse(t); } catch { return v; }
+};
+
+/**
+ * Read a tool call's arguments from wherever Vaani put them: JSON body (possibly nested under
+ * arguments/args/parameters/input), form body, or URL query parameters. Our own ?key= is dropped.
+ */
+export async function readToolArgs(req: Request): Promise<any> {
+  const url = new URL(req.url);
+  const raw = await req.text();
+  let body: any = {};
+  if (raw) {
+    try { body = JSON.parse(raw); }
+    catch { body = Object.fromEntries(new URLSearchParams(raw)); }
+  }
+  const query: Record<string, unknown> = {};
+  url.searchParams.forEach((v, k) => { if (k !== "key") query[k] = v; });
+
+  const fromBody = toolArgs(body);
+  const args: Record<string, unknown> = { ...query, ...(typeof fromBody === "object" && fromBody ? fromBody : {}) };
+  for (const k of Object.keys(args)) args[k] = maybeJson(args[k]);
+
+  // TEMPORARY (testing phase): log what Vaani actually sends. Remove before go-live.
+  const hdrs = [...req.headers.keys()].filter((h) => !/secret|authorization|cookie/i.test(h));
+  console.log("[vaani tool]", url.pathname, "query:", JSON.stringify(query).slice(0, 1500),
+    "| body:", raw.slice(0, 1500), "| content-type:", req.headers.get("content-type"), "| headers:", hdrs.join(","));
+  return args;
 }
 
 export interface EndOfCall {

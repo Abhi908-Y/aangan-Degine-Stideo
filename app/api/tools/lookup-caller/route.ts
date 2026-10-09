@@ -2,11 +2,11 @@
 // so the agent says "welcome back" and doesn't ask the same questions again.
 import { sql } from "@/lib/db";
 import { checkToolSecret } from "@/lib/auth";
-import { toolArgs } from "@/lib/vaani";
+import { readToolArgs } from "@/lib/vaani";
 
 export async function POST(req: Request) {
   const denied = checkToolSecret(req); if (denied) return denied;
-  const { phone } = toolArgs(await req.json());
+  const { phone } = await readToolArgs(req);
   const [lead] = await sql`
     SELECT l.id, l.name, l.tier, l.status, l.fields, l.summary, d.name AS designer, b.starts_at AS booked_at
     FROM leads l

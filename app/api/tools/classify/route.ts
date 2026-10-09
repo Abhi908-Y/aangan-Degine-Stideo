@@ -2,7 +2,7 @@
 // Rules decide the tier; the response tells the agent exactly what to say next.
 import { sql } from "@/lib/db";
 import { checkToolSecret } from "@/lib/auth";
-import { toolArgs } from "@/lib/vaani";
+import { readToolArgs } from "@/lib/vaani";
 import { decide, LeadFields, LINES } from "@/lib/rules";
 import { offerSlots, leastLoadedDesigner } from "@/lib/assign";
 import { sendTelegram, handoffNote } from "@/lib/telegram";
@@ -13,7 +13,16 @@ const dash = (id: number) => `${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/dashboar
 
 export async function POST(req: Request) {
   const denied = checkToolSecret(req); if (denied) return denied;
-  const { phone, fields } = toolArgs(await req.json()) as { phone: string; fields: LeadFields };
+  const args = await readToolArgs(req);
+  // Accept the answers nested under `fields` (as defined) or sent flat alongside `phone`.
+  const { phone, fields: nested, ...flat } = args as { phone?: string; fields?: LeadFields } & Record<string, unknown>;
+  const fields = (nested && typeof nested === "object" ? nested : flat) as LeadFields;
+  if (!phone || !fields?.caller_type) {
+    return Response.json({
+      error: "missing_arguments",
+      hint: "Call classify again with phone (e.g. +919876543210) and fields: caller_type, project_intent, property_category, location_text, decision_maker, plus everything else you collected.",
+    });
+  }
   let d = decide(fields);
 
   // Tier 1 needs a free slot. If no designer has one soon, it becomes a review lead.

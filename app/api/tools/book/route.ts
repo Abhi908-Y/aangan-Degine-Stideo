@@ -3,7 +3,7 @@
 // designer and to the customer's email. Other designers: the mock calendar slot is claimed.
 import { sql } from "@/lib/db";
 import { checkToolSecret } from "@/lib/auth";
-import { toolArgs } from "@/lib/vaani";
+import { readToolArgs } from "@/lib/vaani";
 import { sendTelegram, handoffNote } from "@/lib/telegram";
 import { upsertDeal } from "@/lib/hubspot";
 import { offerSlots } from "@/lib/assign";
@@ -22,7 +22,7 @@ async function retry(say: string) {
 
 export async function POST(req: Request) {
   const denied = checkToolSecret(req); if (denied) return denied;
-  const { lead_id, slot_id, email: rawEmail } = toolArgs(await req.json());
+  const { lead_id, slot_id, email: rawEmail } = await readToolArgs(req);
   const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
 
   const [slotInfo] = await sql`
