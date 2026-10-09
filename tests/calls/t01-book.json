@@ -1,0 +1,21 @@
+{
+  "phone": "+919000000001",
+  "fields": {
+    "caller_type": "new_enquiry",
+    "name": "TEST Priya",
+    "project_intent": "design_and_execution",
+    "property_category": "residential",
+    "location_text": "Kothrud, Dahanukar Colony",
+    "carpet_area_sqft": 1400,
+    "bhk": 3,
+    "scope_type": "full_home",
+    "completion_needed_by": "2027-03-31",
+    "timeline_flexible": false,
+    "decision_maker": "yes",
+    "notes_from_call": "Wants modular kitchen and wardrobes; likes warm wood tones."
+  },
+  "pick_slot": 0,
+  "duration_sec": 210,
+  "summary": "TEST call. Priya, 3BHK in Kothrud (1,400 sq ft), full home design + execution, needs it complete by end of March 2027. Booked a consultation.",
+  "transcript": "Agent: Hello, Aangan Studio — I'm the studio's assistant. This call is recorded so our designers have your details. How can I help?\nCaller: Hi, I've just bought a 3BHK in Kothrud and want the whole flat done — design and execution.\nAgent: Lovely. May I have your name?\nCaller: Priya.\nAgent: Where exactly is the flat, and roughly how big?\nCaller: Dahanukar Colony, about 1,400 square feet carpet.\nAgent: When would you need the project complete?\nCaller: By end of March next year.\nAgent: Are you the one deciding on this?\nCaller: Yes.\nAgent: Anything specific in mind?\nCaller: A modular kitchen, wardrobes, warm wood tones.\nAgent: Our designer is free at the times I'm about to offer — which one works best for you?\nCaller: The first one."
+}
