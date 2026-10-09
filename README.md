@@ -45,6 +45,9 @@ and HubSpot holds the sales pipeline.
 
 ## Check before going live
 
+- **Dashboard login is OFF.** `/dashboard` and its buttons are open to anyone with the URL (callers' names,
+  phones, transcripts; decline + HubSpot actions). Fine while testing with fake calls. Before real calls, restore
+  `middleware.ts` from git history (commit 3188dc1) and set `DASHBOARD_USER` / `DASHBOARD_PASSWORD` in Vercel.
 - **Vaani payload shapes.** `lib/vaani.ts` is the only Vaani-specific file. Make one test call, look at the
   request bodies in the Vercel logs, and adjust `toolArgs` / `normalizeEndOfCall` if field names differ.
   Also check what currency Vaani reports cost in — the dashboard assumes INR.

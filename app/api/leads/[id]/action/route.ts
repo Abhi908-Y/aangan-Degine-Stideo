@@ -1,4 +1,4 @@
-// Dashboard buttons. Every click is logged with WHO did it (shared login, so the
+// Dashboard buttons. Every click is logged with WHO did it (no login, so the
 // designer picks their name in the toggle) and synced to HubSpot.
 import { sql } from "@/lib/db";
 import { setDealStage } from "@/lib/hubspot";
