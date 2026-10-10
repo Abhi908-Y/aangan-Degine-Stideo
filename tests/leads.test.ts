@@ -25,4 +25,11 @@ check("Talegaon → declined", decide(meena).tier === "DECLINE_FACTUAL");
 const sparse = entitiesToFields({ caller_name: "Ravi", location_text: "N/A", budget_max_inr: "null" });
 check("missing values → unclear, goes to review", sparse.location_text === undefined && sparse.budget_inr === null && decide(sparse).tier === "REVIEW");
 
+// Real Vaani call (10 Oct): "3 BHK in Baner" came back with property_category empty.
+const realCall = entitiesToFields({
+  caller_name: "Abhishek Yadav", caller_mobile: "8130254657", project_intent: "design_and_execution", property_category: "",
+  location_text: "Baner", bhk: "3", scope_type: "full_home", completion_needed_by: "2027-03-31", budget_max_inr: "1500000", decision_maker: "yes",
+});
+check("3 BHK with empty type → residential → BOOK", realCall.property_category === "residential" && decide(realCall, new Date("2026-10-10T10:00:00+05:30")).tier === "BOOK");
+
 if (failed) process.exit(1);

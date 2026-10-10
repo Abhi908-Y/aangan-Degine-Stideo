@@ -69,15 +69,20 @@ export function normalisePhone(v: unknown): string | undefined {
 export function entitiesToFields(e: Record<string, unknown>): LeadFields {
   const bMax = num(e.budget_max_inr), bMin = num(e.budget_min_inr);
   const date = text(e.completion_needed_by);
+  const bhk = num(e.bhk);
+  const scope = oneOf(e.scope_type, ["full_home", "partial", "single_room", "commercial_fitout", "unknown"] as const, "unknown");
+  let category = oneOf(e.property_category, ["residential", "office", "clinic", "studio", "restaurant", "hotel", "retail", "gym", "other", "unknown"] as const, "unknown");
+  // Vaani's extraction sometimes leaves the type empty for "a 3 BHK" — a BHK or a home scope means residential.
+  if (category === "unknown" && (bhk || ["full_home", "partial", "single_room"].includes(scope))) category = "residential";
   return {
     caller_type: oneOf(e.caller_type, ["new_enquiry", "existing_client", "other"] as const, "new_enquiry"),
     name: text(e.caller_name),
     project_intent: oneOf(e.project_intent, ["design_and_execution", "advice_only", "decor_only", "furniture_only", "vastu_only", "unclear"] as const, "unclear"),
-    property_category: oneOf(e.property_category, ["residential", "office", "clinic", "studio", "restaurant", "hotel", "retail", "gym", "other", "unknown"] as const, "unknown"),
+    property_category: category,
     location_text: text(e.location_text),
     carpet_area_sqft: num(e.carpet_area_sqft),
-    bhk: num(e.bhk),
-    scope_type: oneOf(e.scope_type, ["full_home", "partial", "single_room", "commercial_fitout", "unknown"] as const, "unknown"),
+    bhk,
+    scope_type: scope,
     rooms_count: num(e.rooms_count),
     completion_needed_by: date && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null,
     timeline_flexible: yes(e.timeline_flexible),
