@@ -7,6 +7,10 @@ const fmt = new Intl.DateTimeFormat("en-IN", {
   timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit",
 });
 const HOUR = 3600 * 1000;
+
+// While the studio runs with one real designer, every lead goes to that designer:
+// set ASSIGN_ALL_TO_DESIGNER_ID (e.g. 1). Remove it to share leads across all active designers again.
+export const pinnedDesignerId = (): number | null => Number(process.env.ASSIGN_ALL_TO_DESIGNER_ID) || null;
 const WINDOW_DAYS = 7;
 
 const toOffer = (r: any): Offer => ({
@@ -18,10 +22,11 @@ const toOffer = (r: any): Offer => ({
 // of their earliest slots. Designers connected to Cal.com (calcom_event_type_id) are used first
 // and their real availability is read live; everyone else uses the mock designer_slots calendar.
 export async function offerSlots(n = 3): Promise<Offer[]> {
+  const pinned = pinnedDesignerId();
   const cal = await sql`
     SELECT d.id, d.name, d.calcom_event_type_id,
            (SELECT count(*) FROM leads l WHERE l.designer_id = d.id AND l.status IN ('open','booked')) AS open_leads
-    FROM designers d WHERE d.active AND d.calcom_event_type_id IS NOT NULL
+    FROM designers d WHERE d.active AND d.calcom_event_type_id IS NOT NULL AND (${pinned}::int IS NULL OR d.id = ${pinned})
     ORDER BY open_leads ASC, random()`;
 
   if (cal.length > 0) {
@@ -50,7 +55,7 @@ export async function offerSlots(n = 3): Promise<Offer[]> {
     WITH load AS (
       SELECT d.id, d.name,
              (SELECT count(*) FROM leads l WHERE l.designer_id = d.id AND l.status IN ('open','booked')) AS open_leads
-      FROM designers d WHERE d.active
+      FROM designers d WHERE d.active AND (${pinned}::int IS NULL OR d.id = ${pinned})
     ),
     free AS (
       SELECT s.id AS slot_id, s.designer_id, s.starts_at
@@ -69,10 +74,11 @@ export async function offerSlots(n = 3): Promise<Offer[]> {
   return rows.map(toOffer);
 }
 
-// Assign a designer for review leads (no slot needed): fewest open leads.
+// Assign a designer for review leads (no slot needed): the pinned designer, else fewest open leads.
 export async function leastLoadedDesigner(): Promise<{ id: number; name: string; telegram_chat_id: string | null }> {
+  const pinned = pinnedDesignerId();
   const [d] = await sql`
-    SELECT d.id, d.name, d.telegram_chat_id FROM designers d WHERE d.active
+    SELECT d.id, d.name, d.telegram_chat_id FROM designers d WHERE d.active AND (${pinned}::int IS NULL OR d.id = ${pinned})
     ORDER BY (SELECT count(*) FROM leads l WHERE l.designer_id = d.id AND l.status IN ('open','booked')) ASC, random()
     LIMIT 1`;
   return d as any;

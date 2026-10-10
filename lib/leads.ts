@@ -3,7 +3,7 @@
 // post-call extraction pulls out of the conversation (see VAANI_DATA_POINTS).
 import { sql } from "./db";
 import { decide, LeadFields } from "./rules";
-import { leastLoadedDesigner } from "./assign";
+import { leastLoadedDesigner, pinnedDesignerId } from "./assign";
 import { sendTelegram, handoffNote } from "./telegram";
 import { upsertDeal } from "./hubspot";
 
@@ -118,6 +118,10 @@ export async function createLead(phone: string, fields: LeadFields): Promise<any
       const dealId = await upsertDeal({ name: fields.name, phone, tier: "REVIEW", designer: designer.name, summary: d.reasons.join("; "), budget: fields.budget_inr, budgetText: fields.budget_text, email: (fields as any).email });
       if (dealId) await sql`UPDATE leads SET hubspot_deal_id=${dealId} WHERE id=${lead.id}`;
     } catch (e) { console.error(e); }
+  }
+  // One-designer mode: existing clients and declines are also owned by that designer (Nikhil still gets the escalation alert).
+  if (pinnedDesignerId() && (d.tier === "ESCALATE" || d.tier === "DECLINE_FACTUAL")) {
+    await sql`UPDATE leads SET designer_id=${pinnedDesignerId()} WHERE id=${lead.id}`;
   }
   if (d.tier === "ESCALATE") {
     await sendTelegram(process.env.TELEGRAM_FOUNDER_CHAT_ID, handoffNote({
