@@ -1,6 +1,6 @@
 // Push this repo's agent setup to Vaani:  npm run vaani:sync
 // - system prompt  ← prompts/voice-agent.md (below the --- line)
-// - custom tools   ← switched off (Vaani doesn't forward their arguments; kept for later)
+// - custom tools   ← our own switched off (Vaani doesn't forward their arguments); Cal.com integration tools untouched
 // - memories       ← remember previous calls (repeat callers)
 // - extraction     ← VAANI_DATA_POINTS from lib/leads.ts (the webhook builds the lead from these)
 // Needs VAANI_API_KEY (env or .env.secrets.local) and VAANI_AGENT_ID (default: the Aangan agent).
@@ -38,7 +38,8 @@ async function main() {
     identity: { system_prompt: prompt },
     actions: {
       agent_id: p.actions.agent_id, agent_name: p.actions.agent_name,
-      functions: p.actions.functions.map((f: any) => ({ ...f, agent_config: { ...f.agent_config, is_enabled: false } })),
+      // Only our own custom tools are switched off; Vaani's integration tools (Cal.com booking) stay as set.
+      functions: p.actions.functions.map((f: any) => (f.is_custom ? { ...f, agent_config: { ...f.agent_config, is_enabled: false } } : f)),
     },
     memories: { ...p.memories, use_previous_call_contexts: true },
   });
@@ -55,7 +56,7 @@ async function main() {
   const ap = after.persona ?? after.config?.persona, an = after.analysis ?? after.config?.analysis;
   console.log("Vaani agent", AGENT);
   console.log("  prompt synced:     ", ap.identity.system_prompt === prompt, `(${prompt.length} chars)`);
-  console.log("  custom tools on:   ", ap.actions.functions.filter((f: any) => f.agent_config?.is_enabled).length);
+  console.log("  tools on:          ", ap.actions.functions.filter((f: any) => f.agent_config?.is_enabled).map((f: any) => f.function_name).join(", ") || "none");
   console.log("  remember callers:  ", ap.memories.use_previous_call_contexts);
   console.log("  extraction fields: ", an.extraction.data_collection.enabled ? an.extraction.data_collection.data_points.length : "off");
 }
